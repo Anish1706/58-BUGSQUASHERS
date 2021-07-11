@@ -1,110 +1,60 @@
-<body>
-<!-- header -->
-<div class="container inner">
-	<div class="agileits_header">
-		<div class="w3l_offers">
-			<a href="offer.php">Special Offers !</a>
-		</div>
-		<div class="w3l_search">
-			<form action="search.php" method="get">
-				<input type="text" name="search" value="Search a product..." onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'Search a product...';}" required="">
-				<input type="submit" value=" ">
-			</form>
-		</div>
-		<div class="w3l_header_right">
-			<ul>
-				<li class="dropdown profile_details_drop">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user" aria-hidden="true"></i> My Account <span class="caret"></span></a>
-					<div class="mega-dropdown-menu">
-						<div class="w3ls_vegetables">
-							<ul class="dropdown-menu drp-mnu">
-								
-								<?php
-									if(isset($_SESSION['UserEmail']) && isset($_SESSION['UserFullName']))
-									{
-										echo "
-											<li><a href='order.php?name=WW91ciBPcmRlciBIaXN0b3J5'>Order History</a></li>
-											<li><a href='myaccount.php?name=TXkgQWNjb3VudA=='>Account</a></li>
-											<li><a href='order.php?name=WW91ciBPcmRlciBIaXN0b3J5'>Track Order</a></li>
-											<li><a href='logout.php'>Log Out</a></li>
-										";
-									}
-									else
-									{
-										echo "
-											<li><a href='login.php?name=".base64_encode('User Login')."'>Login</a></li>
-								            <li><a href='register1.php?name=".base64_encode('Create New Account')."'>Shopkeeper-signup</a></li>
-											<li><a href='register.php?name=".base64_encode('Create New Account')."'>customer-signup</a></li>
-										";
-									}
-								?>
-								
-							</ul>
-						</div>                  
-					</div>	
-				</li>
-			</ul>
-		</div>
-		<div class="product_list_header">  
-			<form action="cart.php?name=Q2FydA==" method="post" class="last">
-                <fieldset>
-                    <input type="hidden" name="cmd" value="_cart" />
-                    <input type="hidden" name="display" value="1" />
-                    <input type="submit" name="submit" value="View cart" class="button" />
-                </fieldset>
-            </form>
-		</div>
-		<div class="w3l_header_right1">
-			<h2><a href="contact.php">Contact</a></h2>
-		</div>
-		<div class="clearfix"> </div>
-	</div>
-<!-- script-for sticky-nav -->
-	<script>
-	$(document).ready(function() {
-		 var navoffeset=$(".agileits_header").offset().top;
-		 $(window).scroll(function(){
-			var scrollpos=$(window).scrollTop(); 
-			if(scrollpos >=navoffeset){
-				$(".agileits_header").addClass("fixed");
-			}else{
-				$(".agileits_header").removeClass("fixed");
-			}
-		 });
-		 
-	});
-	</script>
-<!-- //script-for sticky-nav -->
-	<div class="logo_products" style="background-color: #000; background-image: url('img/bg.png');">
-		<div class="container">
-			<div class="w3ls_logo_products_left">
-				<a href="index.php"><img src="img/logo.png" class="logo2"></a>
-			</div>
-			<div class="w3ls_logo_products_left1">
-				<ul class="special_items" style="color:#fff;">
-					<li><a href="index.php" style="color:#fff;">Home</a><i>/</i></li>
-					<li><a href="about.php" style="color:#fff;">About Us</a><i>/</i></li>
-					<li><a href="allproduct.php" style="color:#fff;">Products</a>/</li>
-					<li><a href="single.php" style="color:#fff;">single-Products</a></li>
-				</ul>
-			</div>
-			<div class="w3ls_logo_products_left1">
-				<ul class="phone_email" >
-					<li style="color:#fff;"><i class="fa fa-phone" style="color:#fff;" aria-hidden="true"></i>(+91) 7483538458</li>
-					<li style="color:#fff;"><i class="fa fa-envelope-o" style="color:#fff;" aria-hidden="true"></i><a href="mailto:contact.balaskolkata@gmail.com" style="color:#fff;">vinayhn2019@gmail.com</a></li>
-				</ul>
-			</div>
-			<div class="clearfix"> </div>
-		</div>
-	</div>
-<!-- //header -->
-<!-- products-breadcrumb -->
-	<div class="products-breadcrumb">
-		<div class="container">
-			<ul>
-				<li><i class="fa fa-home" aria-hidden="true"></i><a href="index.php">Home</a></li>
-				
-			</ul>
-		</div>
-	</div>
-<!-- //products-breadcrumb -->
+<div class="ch-container">
+    <div class="row">
+        
+        <!-- left menu starts -->
+        <div class="col-sm-2 col-lg-2">
+            <div class="sidebar-nav">
+                <div class="nav-canvas">
+                    <div class="nav-sm nav nav-stacked">
+
+                    </div>
+                    <ul class="nav nav-pills nav-stacked main-menu">
+                        <li class="nav-header">Main</li>
+                        <li><a class="ajax-link" href="dashboard.php"><i class="glyphicon glyphicon-home"></i><span> Dashboard</span></a>
+                        </li>
+                         <li><a class="ajax-link" href="banner.php"><i class="glyphicon glyphicon-certificate"></i><span> Banner</span></a>
+                        </li>
+                        <li><a class="ajax-link" href="categories.php"><i class="glyphicon glyphicon-list-alt"></i><span> Categories</span></a>
+                        </li>
+                        <li><a class="ajax-link" href="collection.php"><i class="glyphicon glyphicon-star-empty"></i><span> Collection</span></a>
+                        </li>
+                        <li><a class="ajax-link" href="product.php"><i class="glyphicon glyphicon-eye-open"></i><span> Products</span></a>
+                        </li>
+                        <li><a class="ajax-link" href="cod.php"><i
+                                    class="glyphicon glyphicon-globe"></i><span> COD Setup</span></a></li>
+
+                        <li class="nav-header hidden-md">Order Managment</li>
+                        <!--li><a class="ajax-link" href="pendingorder.php"><i
+                                    class="glyphicon glyphicon-euro"></i><span> Pending Orer</span></a></li-->
+                        <li><a class="ajax-link" href="vieworder.php"><i
+                                    class="glyphicon glyphicon-ok-circle"></i><span> All Order</span></a></li>
+                                    <li><a class="ajax-link" href="review.php"><i
+                                    class="glyphicon glyphicon-ok-circle"></i><span> Review</span></a></li>
+                        <li class="nav-header hidden-md">Manage Account Section</li>
+                        <li><a class="ajax-link" href="account.php"><i
+                                    class="glyphicon glyphicon-qrcode"></i><span> Account Settings</span></a></li>
+                        <!--li class="accordion">
+                            <a href="#"><i class="glyphicon glyphicon-plus"></i><span> Accordion Menu</span></a>
+                            <ul class="nav nav-pills nav-stacked">
+                                <li><a href="#">Child Menu 1</a></li>
+                                <li><a href="#">Child Menu 2</a></li>
+                            </ul>
+                        </li>
+                        <li><a class="ajax-link" href="calendar.html"><i class="glyphicon glyphicon-calendar"></i><span> Calendar</span></a>
+                        </li>
+                        <li><a class="ajax-link" href="grid.html"><i
+                                    class="glyphicon glyphicon-th"></i><span> Grid</span></a></li>
+                        <li><a href="tour.html"><i class="glyphicon glyphicon-globe"></i><span> Tour</span></a></li>
+                        <li><a class="ajax-link" href="icon.html"><i
+                                    class="glyphicon glyphicon-star"></i><span> Icons</span></a></li>
+                        <li><a href="error.html"><i class="glyphicon glyphicon-ban-circle"></i><span> Error Page</span></a>
+                        </li>
+                        <li><a href="login.html"><i class="glyphicon glyphicon-lock"></i><span> Login Page</span></a>
+                        </li-->
+                    </ul>
+                    <label id="for-is-ajax" for="is-ajax"><input id="is-ajax" type="checkbox"> Ajax on menu</label>
+                </div>
+            </div>
+        </div>
+        <!--/span-->
+        <!-- left menu ends -->

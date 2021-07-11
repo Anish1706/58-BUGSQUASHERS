@@ -1,235 +1,429 @@
 <?php
+
 include_once('db_config.php');
-date_default_timezone_set('Asia/Kolkata');
 
-//Create New Account
-function RegisterNewUser($customer_email,$customer_name,$customer_number,$password,$retypepassword)
+// This function For Check Authentication For Admin
+function adminlogin($username,$password)
 {
-
-	//Check Email Already Exist Or Not
 	global $con;
-	$sql121="SELECT `customer_email` FROM `balas_user` WHERE `customer_email`='".mysqli_real_escape_string($con,$customer_email)."' ";
-	$result121=$con->query($sql121);
-	if ($result121->num_rows < 1) {
-		if(strlen($customer_name)>0 && strlen($customer_number)>0 && strlen($password)>0 && strlen($retypepassword)>0)
-		{
-			if($password==$retypepassword)
-			{
-				global $con;
-				$sql="INSERT INTO `balas_user`(`customer_email`, `customer_name`, `customer_number`, `password`) VALUES ('".mysqli_real_escape_string($con,$customer_email)."','".mysqli_real_escape_string($con,$customer_name)."','".mysqli_real_escape_string($con,$customer_number)."','".mysqli_real_escape_string($con,$password)."')";
-				if($con->query($sql) === true){
-					echo "
-					<div class='alert alert-success alert-dismissible' role='alert'>
-					  <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-					  <strong>success!</strong> you can login your account.
-					</div>
 
-					";
-				}
-			}
-			else
-			{
-				echo "
-					<div class='alert alert-danger alert-dismissible' role='alert'>
-					  <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-					  <strong>Oh snap!</strong> Password And Retype Password Should Be Same.
-					</div>
+	///Sql Query
+	$sql="SELECT * FROM `admin_login` WHERE `email`='".mysqli_real_escape_string($con,$username)."' AND `password`='".mysqli_real_escape_string($con,$password)."'";
 
-					";
-			}
-		}
-		else
-		{
-			echo "
-					<div class='alert alert-danger alert-dismissible' role='alert'>
-					  <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-					  <strong>Oh snap!</strong> Change a few things up and try submitting again.
-					</div>
+	$result=$con->query($sql);
+	if($result->num_rows==1)
+	{
+		session_start();
+		$_SESSION['BalasAdmin']=$username;
+		header('Location:dashboard.php?status=ok');
 
-					";
-		}
 	}
 	else
 	{
-		echo "
-				<div class='alert alert-danger alert-dismissible' role='alert'>
-				  <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-				  <strong>Oh snap!</strong> Email Already Exist. <a href='forgot.php'>Forgot Password?</a>
-				</div>
-
-				";
+		header('Location:adminlogin.php?auth');
 	}
-
 	
 }
 
-//function create check login
-function checklogin($email,$password,$redirect)
+
+
+//This Function For Banner Upload
+function UploadBanner($url,$image)
 {
 	global $con;
-	$sql="SELECT `customer_email`, `customer_name`, `password`  FROM `balas_user` WHERE  `customer_email`='".mysqli_real_escape_string($con,$email)."' ";
-	$result=$con->query($sql);
 
-	if($result->num_rows>0)
+	//Upload File Here
+	
+
+	$sql="INSERT INTO `front_banner`(`url`, `image`) VALUES ('".mysqli_real_escape_string($con,$url)."','".mysqli_real_escape_string($con,$image)."')";
+	if($con->query($sql)>0)
 	{
-		$row=$result->fetch_assoc();
-		if($row['password']==$password && $row['customer_email']==$email)
-		{
-			session_start();
-			$_SESSION["UserEmail"]=$email;
-			$_SESSION["UserFullName"]=$row['customer_name'];
-			if(strlen($redirect)>0)
-			{
-				echo "<script>window.open('".$redirect."','_self');</script>";
-			}
-			else{
-			echo "<script>window.open('myaccount.php','_self');</script>";
-			}
-		}
-		else
-		{
-			echo "
-				<div class='alert alert-danger alert-dismissible' role='alert'>
-				  <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-				  <strong>Oh snap!</strong> Enter Valid Email Or Password.
-				</div>
-
-				";
-		}
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Banner Upload Successfully.
+	            </div>";
 	}
 	else
 	{
-
-		echo "
-				<div class='alert alert-danger alert-dismissible' role='alert'>
-				  <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-				  <strong>Oh snap!</strong> Enter Valid Email Or Password. Or <a href='register.php?name=".base64_encode('Create New Account')."'>Create Account?</a>
-				</div>
-
-				";
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
 	}
 }
 
 
-///this function update cart item
-function updatecateitem($cart_id,$qty)
+//This Function Delete Banner 
+function deleteBanner($id)
 {
 	global $con;
-	$sql="UPDATE `balas_cart` SET `qty`='".mysqli_real_escape_string($con,$qty)."' WHERE `Cart_ID`='".mysqli_real_escape_string($con,$cart_id)."' ";
 
-	if($con->query($sql)){
-		echo "<script>alert('Cart Updated')</script>";
+	//Sql
+	$sql="DELETE FROM `front_banner` WHERE `banner_id`='".base64_decode($id)."' ";
+
+	if($result=$con->query($sql) === TRUE)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Banner Deleted Successfully.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
 	}
 }
 
-// this function detete cart item
-function deletecart($id)
+
+//This Function  To Create Category
+function createCategory($categoryName,$image)
 {
 	global $con;
-	$sql="DELETE FROM `balas_cart` WHERE `Cart_ID`='".base64_decode($id)."' ";
 
+	//SQL
+	$sql="INSERT INTO catrgories (`category_name`,`category_image`) VALUES('".mysqli_real_escape_string($con,$categoryName)."','".mysqli_real_escape_string($con,$image)."')";
+	if($con->query($sql)>0)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Category Upload Successfully.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}
+
+}
+
+
+///This Function For delete banner 
+
+function deleteCategories($id)
+{
+	global $con;
+
+	//Sql
+	$sql="DELETE FROM `catrgories` WHERE `category_id`='".base64_decode($id)."' ";
+
+	if($result=$con->query($sql) === TRUE)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Category Deleted Successfully.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}
+}
+
+
+//Function To Update Categories
+function UpdateCategories($CategoryID,$CategoryName,$CategoryImage)
+{
+	global $con;
+
+	if($CategoryImage!=null)
+	{
+		$sql="UPDATE `catrgories` SET `category_name`='".mysqli_real_escape_string($con,$CategoryName)."',`category_image`='".mysqli_real_escape_string($con,$CategoryImage)."' WHERE `category_id`='".mysqli_real_escape_string($con,$CategoryID)."' ";
+	}
+	else
+	{
+		$sql="UPDATE `catrgories` SET `category_name`='".mysqli_real_escape_string($con,$CategoryName)."' WHERE `category_id`='".mysqli_real_escape_string($con,$CategoryID)."' ";
+	}
+
+	if($result=$con->query($sql) === TRUE)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Category Updated Successfully.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}
+}
+
+
+///this function to create product 
+function createProduct($productName,$description,$image,$price,$sell,$special,$sku)
+{
+	global $con;
+
+	//SQL
+	$sql="INSERT INTO `balas_product`(`product_name`, `description`, `image`, `price`, `selling`, `special`,`SKU`) VALUES ('".mysqli_real_escape_string($con,$productName)."','".mysqli_real_escape_string($con,$description)."','".mysqli_real_escape_string($con,$image)."','".mysqli_real_escape_string($con,$price)."','".mysqli_real_escape_string($con,$sell)."','".mysqli_real_escape_string($con,$special)."','".mysqli_real_escape_string($con,$sku)."')";
+
+	if($result=$con->query($sql) === TRUE)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Product Added Successfully.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}
+
+	return mysqli_insert_id($con);
+
+}
+
+///Function Delete Project
+function DeleteProject($ProjectID)
+{
+	global $con;
+	$sql="DELETE FROM `balas_product` WHERE `product_id`='".mysqli_real_escape_string($con,$ProjectID)."' ";
+	$sql1="DELETE FROM `product_category` WHERE `product_id`='".mysqli_real_escape_string($con,$ProjectID)."' ";
+	$sql2="DELETE FROM `product_collection` WHERE `product_id`='".mysqli_real_escape_string($con,$ProjectID)."' ";
+
+	if($con->query($sql) === TRUE && $con->query($sql1) && $con->query($sql2))
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Product Deleted.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}
+
+} 
+
+
+//Function For Edit Details
+function EditProductDetails($productName,$description,$image,$price,$sell,$special,$productId,$sku)
+{
+	global $con;
+	if($image==null)
+	{
+		$sql="UPDATE `balas_product` SET `product_name`='".mysqli_real_escape_string($con,$productName)."',`description`='".mysqli_real_escape_string($con,$description)."',`image`='".mysqli_real_escape_string($con,$image)."',`price`='".mysqli_real_escape_string($con,$price)."',`selling`='".mysqli_real_escape_string($con,$sell)."',`special`='".mysqli_real_escape_string($con,$special)."',`SKU`='".mysqli_real_escape_string($con,$sku)."' WHERE `product_id`='".mysqli_real_escape_string($con,$productId)."' ";
+
+	}
+	else
+	{
+		$sql="UPDATE `balas_product` SET `product_name`='".mysqli_real_escape_string($con,$productName)."',`description`='".mysqli_real_escape_string($con,$description)."',`price`='".mysqli_real_escape_string($con,$price)."',`selling`='".mysqli_real_escape_string($con,$sell)."',`special`='".mysqli_real_escape_string($con,$special)."',`SKU`='".mysqli_real_escape_string($con,$sku)."' WHERE `product_id`='".mysqli_real_escape_string($con,$productId)."' ";
+	}
+
+
+	if($result=$con->query($sql) === TRUE)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Product Update Successfully.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}
+
+
+}
+
+
+///this function delete categories by product id
+function DeleteCategoriesByProductID($id)
+{
+	global $con;
+	$sql="DELETE FROM `product_category` WHERE `product_id`='".$id."'";
+
+	$con->query($sql) or die('Opps Categories Not Deteted');
+}
+
+
+///Function Create New COD location
+function CreateCODlocation($pin,$location)
+{
+	global $con;
+
+	$sql="INSERT INTO `cod_location`(`pin`,`location`) VALUES('".mysqli_real_escape_string($con,$pin)."','".mysqli_real_escape_string($con,$location)."')";
+
+	if($con->query($sql) === TRUE)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Location Createed Successfully.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}
+}
+
+
+//this dection to delete location
+function deleteCodLocation($id)
+{
+	global $con;
+
+	$sql="DELETE FROM `cod_location` WHERE `location_id`='".mysqli_real_escape_string($con,$id)."' ";
+	if($con->query($sql) === TRUE)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Location Deleted Successfully.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}
+}
+
+
+//this function create new account
+function createnewaccount($username,$password)
+{
+	global $con;
+
+	$sql="INSERT INTO `admin_login`(`email`,`password`) VALUES('".mysqli_real_escape_string($con,$username)."','".mysqli_real_escape_string($con,$password)."')";
+
+	if($con->query($sql) === TRUE)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Account Created.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}
+}
+
+// This Section To Delete Account
+function deleteAccount($id)
+{
+	global $con;
+
+	$sql="DELETE FROM `admin_login` WHERE `admin_id`='".base64_decode($id)."' ";
+
+
+	if($con->query($sql) === TRUE)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Account Deleted.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}
+}
+
+// Thsi Section To Create New Collection 
+
+function createcollection($collectionname,$collectionbanner,$collectionthumble,$details)
+{
+	global $con;
+
+	$sql="INSERT INTO `collection`(`collection_name`,`collection_banner`,`collection_thumble`,`collection_details`) VALUES('".mysqli_real_escape_string($con,$collectionname)."','".mysqli_real_escape_string($con,$collectionbanner)."','".mysqli_real_escape_string($con,$collectionthumble)."','".mysqli_real_escape_string($con,$details)."')";
+	if($con->query($sql)===true)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Collection  Created.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}
+}
+
+///this function delete collection
+function deletecollection($id)
+{
+	global $con;
+
+	$sql="DELETE FROM `collection` WHERE `collection_id`='".base64_decode($id)."' ";
+
+
+	if($con->query($sql) === TRUE)
+	{
+		echo " <div class='alert alert-success'>
+	                <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                <strong>Sucess!</strong> Collection Deleted.
+	            </div>";
+	}
+	else
+	{
+		echo " <div class='alert alert-danger'>
+	                    <button type='button' class='close' data-dismiss='alert'>&times;</button>
+	                    <strong>Oh snap!</strong> Change a few things up and try submitting again.
+	                </div>";
+	}	
+}
+
+
+///this function delete collection by product id
+function DeleteCollectionByProductID($id)
+{
+	global $con;
+	$sql="DELETE FROM `product_collection` WHERE `product_id`='".$id."'";
+
+	$con->query($sql) or die('Opps Collections Not Deteted');
+}
+
+
+//this function update order status
+function changeorderstatusbydid($order_id,$status,$cart_id,$redir)
+{
+	global $con;
+	//echo "<script>alert('".$order_id."');</script>";
+	//echo "<script>alert('".$status."');</script>";
+	//echo "<script>alert('".$cart_id."');</script>";
+	//echo "<script>alert('".$redir."');</script>";
+	$sql="UPDATE `balas_order` SET `current_status`='".mysqli_real_escape_string($con,$status)."' WHERE `order_id`='".mysqli_real_escape_string($con,$order_id)."' ";
 	if($con->query($sql))
 	{
-		echo "<script>alert('Item Deleted');</script>";
+		echo "<script>alert('Status Changed');</script>";
+		echo "<script>window.open('singleorder.php?orderid=".base64_encode($order_id)."&cart_id=".$cart_id."&redirct=".$redir."','_self');</script>";
 	}
+
 }
 
-
-//this function place order
-function placeorder($txtName,$txtEmail,$txtPhone,$txtAddress,$txtLandmark,$txtPincode,$txtState,$txtTotalAmount,$txtCartId,$txtDelivaryCharge,$txtMode)
-{
-	global $con;
-
-	if($txtMode=="Online")
-	{
-		$sql="INSERT INTO `balas_order`(`cart_id`, `order_by`, `email`, `phone`, `address`, `landmark`, `pin`, `state`, `totalamount`, `deliverycharge`, `date`, `time`, `mode`) VALUES ('".mysqli_real_escape_string($con,$txtCartId)."','".mysqli_real_escape_string($con,$txtName)."','".mysqli_real_escape_string($con,$txtEmail)."','".mysqli_real_escape_string($con,$txtPhone)."','".mysqli_real_escape_string($con,$txtAddress)."','".mysqli_real_escape_string($con,$txtLandmark)."','".mysqli_real_escape_string($con,$txtPincode)."','".mysqli_real_escape_string($con,$txtState)."','".mysqli_real_escape_string($con,$txtTotalAmount)."','".mysqli_real_escape_string($con,$txtDelivaryCharge)."','".mysqli_real_escape_string($con,date('d-m-Y'))."','".mysqli_real_escape_string($con,date('H:i'))."','".mysqli_real_escape_string($con,$txtMode)."')";
-
-	}
-	else
-	{
-		$sql="INSERT INTO `balas_order`(`cart_id`, `order_by`, `email`, `phone`, `address`, `landmark`, `pin`, `state`, `totalamount`, `deliverycharge`, `date`, `time`, `mode`,`payment`) VALUES ('".mysqli_real_escape_string($con,$txtCartId)."','".mysqli_real_escape_string($con,$txtName)."','".mysqli_real_escape_string($con,$txtEmail)."','".mysqli_real_escape_string($con,$txtPhone)."','".mysqli_real_escape_string($con,$txtAddress)."','".mysqli_real_escape_string($con,$txtLandmark)."','".mysqli_real_escape_string($con,$txtPincode)."','".mysqli_real_escape_string($con,$txtState)."','".mysqli_real_escape_string($con,$txtTotalAmount)."','".mysqli_real_escape_string($con,$txtDelivaryCharge)."','".mysqli_real_escape_string($con,date('Y-m-d'))."','".mysqli_real_escape_string($con,date('H:i'))."','".mysqli_real_escape_string($con,$txtMode)."','1')";
-	}
-
-	
-	$result=$con->query($sql);
-	$OrderId="#ORDBALAS".mysqli_insert_id($con);
-	if($result>0)
-	{
-		if($txtMode=="Online")
-		{
-			//Online Code Here
-			echo "<script>window.open('ccavenue.php?oderid=".base64_encode($OrderId)."','_self');</script>";
-		}
-		else
-		{
-		session_start();
-		unset($_SESSION['uniqueSessionID']);
-
-		$to = 'contact.balaskolkata@gmail.com';
-		$subject = 'New Order From Website-- Order Id-'.$OrderId;
-		$from = 'order@balaskolkata.com';
-		 
-		// To send HTML mail, the Content-type header must be set
-		$headers  = 'MIME-Version: 1.0' . "\r\n";
-		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-		 
-		// Create email headers
-		$headers .= 'From: '.$from."\r\n".
-		    'Reply-To: '.$from."\r\n" .
-		    'X-Mailer: PHP/' . phpversion();
-		 
-		// Compose a simple HTML email message
-		$message = '<html><body>';
-		$message .= '<h1 style="color:#f40;">You Have A New Order From Website</h1>';
-		$message .= '<p style="color:#080;font-size:18px;">Order Id- '.$OrderId;
-		$message .= '</p></body></html>';
-		 
-		// Sending email
-		if(mail($to, $subject, $message, $headers)){
-		    echo 'Your mail has been sent successfully.';
-		} else{
-		    echo 'Unable to send email. Please try again.';
-		}
-
-		// this section send mail to customer
-		$mailbody="Dear Customer(s),\n
-		Thank you for placing an order at www.balaskolkata.com \n
-		Your order no is ".$OrderId."\n
-		Please log in to www.balaskolkata.com to track your order status.\n
-		Looking forward to serve you again.\n\n
-
-		Thanks & Regards,\n
-		Balas Team\n
-		Kolkata\n
-		(+91) 91634 88628\n
-		Look Good! Do Good.'
-		";
-
-		$by ='From: orders@balaskolkata.com'."\r\n".
-         'Reply-To: orders@balaskolkata.com'."\r\n" .
-          'X-Mailer: PHP/' . phpversion();
-
-		mail($txtEmail, "Thank you for placing an order at www.balaskolkata.com", $mailbody, $by);
-
-			echo "<script>window.open('payment_success.php?name=T3JkZXIgU3VjZXNz','_self');</script>";
-		}
-	}
-}
-
-
-//function to add new review
-function createreview($product_id,$title,$details,$rate)
-{
-	global $con;
-	$sql="INSERT INTO `product_review`(`product_id`, `review_by(email)`, `review_by(name)`, `title`, `details`, `rate`) VALUES ('".mysqli_real_escape_string($con,$product_id)."','".mysqli_real_escape_string($con,$_SESSION['UserEmail'])."','".mysqli_real_escape_string($con,$_SESSION['UserFullName'])."','".mysqli_real_escape_string($con,$title)."','".mysqli_real_escape_string($con,$details)."','".mysqli_real_escape_string($con,$rate)."')";
-	if($con->query($sql) === true){
-					echo "
-					<div class='alert alert-success alert-dismissible' role='alert'>
-					  <button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-					  <strong>success!</strong> Review Added.
-					</div>
-
-					";
-				}
-}
 ?>
